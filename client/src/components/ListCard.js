@@ -23,7 +23,7 @@ function ListCard(props) {
 
             // CHANGE THE CURRENT LIST
             store.setCurrentList(_id);
-            console.log(_id);
+
         }
     }
 

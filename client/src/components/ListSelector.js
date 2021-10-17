@@ -14,16 +14,18 @@ const ListSelector = () => {
     store.history = useHistory();
 
     function addList() {
-        console.log("added");
         apis.createTop5List({
             "name" : "Untitled",
             "items": ["?", "?", "?", "?", "?"]
-        });
+        }).then(store.loadIdNamePairs()).then(loadList());
+    }
+
+    function loadList(){
+        console.log(store.idNamePairs);
         let _id = store.idNamePairs.at(-1)._id;
         if (_id.indexOf('list-card-text-') >= 0)
         _id = ("" + _id).substring("list-card-text-".length);
         store.setCurrentList(_id);
-        console.log(_id);
     }
 
     useEffect(() => {
