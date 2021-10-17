@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom'
 import ListCard from './ListCard.js'
 import { GlobalStoreContext } from '../store'
 import DeleteModal from './DeleteModal'
+import apis from '../api/index.js'
 /*
     This React component lists all the top5 lists in the UI.
     
@@ -11,6 +12,19 @@ import DeleteModal from './DeleteModal'
 const ListSelector = () => {
     const { store } = useContext(GlobalStoreContext);
     store.history = useHistory();
+
+    function addList() {
+        console.log("added");
+        apis.createTop5List({
+            "name" : "Untitled",
+            "items": ["?", "?", "?", "?", "?"]
+        });
+        let _id = store.idNamePairs.at(-1)._id;
+        if (_id.indexOf('list-card-text-') >= 0)
+        _id = ("" + _id).substring("list-card-text-".length);
+        store.setCurrentList(_id);
+        console.log(_id);
+    }
 
     useEffect(() => {
         store.loadIdNamePairs();
@@ -33,7 +47,8 @@ const ListSelector = () => {
                     type="button"
                     id="add-list-button"
                     className="top5-button"
-                    value="+" />
+                    value="+"
+                    onClick= {addList} />
                 Your Lists
             </div>
             <div id="list-selector-list">
