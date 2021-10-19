@@ -16,6 +16,8 @@ function DeleteModal() {
         name = store.currentList.name;
     }
     function handleDeleteList(event) {
+        console.log("deleting");
+        event.stopPropagation();
         store.deleteMarkedList();
     }
     function handleCloseModal(event) {

@@ -11,8 +11,10 @@ import { GlobalStoreContext } from '../store'
 function Workspace() {
     const { store } = useContext(GlobalStoreContext);
     store.history = useHistory();
+    const history = useHistory();
 
     let editItems = "";
+    if(store.currentList === null) history.push("/");
     if (store.currentList) {
         editItems = 
             <div id="edit-items">
@@ -42,6 +44,7 @@ function Workspace() {
             </div>
         </div>
     )
+
 }
 
 export default Workspace;

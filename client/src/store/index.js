@@ -29,13 +29,13 @@ export const GlobalStoreActionType = {
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
 const tps = new jsTPS();
-
 let counter = 0;
 
 // WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
 // AVAILABLE TO THE REST OF THE APPLICATION
 export const useGlobalStore = () => {
     // THESE ARE ALL THE THINGS OUR DATA STORE WILL MANAGE
+    
     const [store, setStore] = useState({
         idNamePairs: [],
         currentList: null,
@@ -56,7 +56,6 @@ export const useGlobalStore = () => {
         const { type, payload } = action;
         let isUndoActive= tps.hasTransactionToUndo();
         let isRedoActive= tps.hasTransactionToRedo();
-        console.log(isUndoActive);
         switch (type) {
             // LIST UPDATE OF ITS NAME
             case GlobalStoreActionType.CHANGE_LIST_NAME: {
@@ -147,7 +146,6 @@ export const useGlobalStore = () => {
             }
 
             case GlobalStoreActionType.CREATE_LIST: {
-                console.log("created");
                 return setStore({
                     idNamePairs: payload,
                     currentList: null,
@@ -176,7 +174,7 @@ export const useGlobalStore = () => {
                 let top5List = response.data.top5List;
                 top5List.name = newName;
                 async function updateList(top5List) {
-                    response = await api.updateTop5ListById(top5List._id, top5List);
+                    response = await api.updateTop5ListById(top5List._id, top5List).then().catch(store.loadIdNamePairs());
                     if (response.data.success) {
                         async function getListPairs(top5List) {
                             response = await api.getTop5ListPairs();
@@ -346,10 +344,11 @@ export const useGlobalStore = () => {
     //deletes the list that is currently marked for deleltion
     store.deleteMarkedList = function () {
         async function asyncStartDeleteList(){ 
-            let response = await apis.deleteTop5ListById(store.listMarkedForDeletion._id);
+            let response = await apis.deleteTop5ListById(store.listMarkedForDeletion._id).then().catch(store.loadIdNamePairs());
             if(response.data.success){
+                let response;
                 async function getListPairs(){
-                    let response = await apis.getTop5ListPairs();
+                    response = await apis.getTop5ListPairs();
                     if(response.data.success){
                         store.loadIdNamePairs();
                         let pairs = response.data.idNamePairs;
@@ -361,15 +360,17 @@ export const useGlobalStore = () => {
                     }
                 }
                 getListPairs();
+            }else{
+                store.loadIdNamePairs();
+                console.log("error");
             }
         }
         store.hideDeleteListModal();
-        asyncStartDeleteList().then(store.loadIdNamePairs());
+        asyncStartDeleteList();
         store.loadIdNamePairs();
     }
 
     store.createList = function () {
-        console.log(counter);
         let newList = {
             "name" : "Untitled " + (counter + 1),
             "items": ["?", "?", "?", "?", "?"]
@@ -382,6 +383,7 @@ export const useGlobalStore = () => {
                     let response = await apis.getTop5ListPairs();
                     if(response.data.success){
                         let pairs = response.data.idNamePairs;
+                        store.loadIdNamePairs();
                         storeReducer({
                             type: GlobalStoreActionType.CREATE_LIST,
                             newListCounter: 11,
