@@ -13,14 +13,18 @@ const ListSelector = () => {
     const { store } = useContext(GlobalStoreContext);
     store.history = useHistory();
 
-    function addList() {
-        apis.createTop5List({
+    async function addList() {
+       let response = await apis.createTop5List({
             "name" : "Untitled",
             "items": ["?", "?", "?", "?", "?"]
-        }).then(store.loadIdNamePairs()).then(loadList());
+        });
+        if (response.data.success) {
+            loadList();
+        }
     }
 
     function loadList(){
+        store.loadIdNamePairs();
         console.log(store.idNamePairs);
         let _id = store.idNamePairs.at(-1)._id;
         if (_id.indexOf('list-card-text-') >= 0)

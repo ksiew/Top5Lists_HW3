@@ -52,6 +52,10 @@ function ListCard(props) {
         setText(event.target.value );
     }
 
+    function handleDelete(event){
+        store.startDeleteList(idNamePair._id);
+    }
+
     let selectClass = "unselected-list-card";
     if (selected) {
         selectClass = "selected-list-card";
@@ -77,6 +81,7 @@ function ListCard(props) {
                 type="button"
                 id={"delete-list-" + idNamePair._id}
                 className="list-card-button"
+                onClick={handleDelete}
                 value={"\u2715"}
             />
             <input

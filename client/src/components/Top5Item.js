@@ -74,6 +74,11 @@ function Top5Item(props) {
         setText(event.target.value );
     }
 
+
+    let itemEditing = false;
+    if(store.isItemEditActive == true){
+        itemEditing = true;
+    } 
     let itemElement = 
         <div
             id={'item-' + (index + 1)}
@@ -86,11 +91,12 @@ function Top5Item(props) {
             draggable="true"
         >
             <input
+                disabled = {itemEditing}
                 type="button"
                 id={"edit-item-" + index + 1}
                 className="list-card-button"
                 value={"\u270E"}
-                onClick = {handleToggleEdit}
+                onClick = {itemEditing ? undefined : handleToggleEdit}
             />
             {props.text}
         </div>;
@@ -102,7 +108,7 @@ function Top5Item(props) {
             type='text'
             onKeyPress={handleKeyPress}
             onChange={handleUpdateText}
-            defaultValue={text}
+            defaultValue={props.text}
         />;
     }
 
