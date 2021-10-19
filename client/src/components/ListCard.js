@@ -41,6 +41,7 @@ function ListCard(props) {
     }
 
     function handleKeyPress(event) {
+        event.stopPropagation();
         if (event.code === "Enter") {
             let id = event.target.id.substring("list-".length);
             store.changeListName(id, text);
@@ -53,6 +54,7 @@ function ListCard(props) {
     }
 
     function handleDelete(event){
+        event.stopPropagation();
         store.startDeleteList(idNamePair._id);
     }
 

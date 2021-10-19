@@ -23,11 +23,14 @@ export const GlobalStoreActionType = {
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
     SET_ITEM_NAME_EDIT_ACTIVE: "SET_ITEM_NAME_EDIT_ACTIVE",
     DELETE_MARKED_LIST: "DELETE_MARKED_LIST",
-    START_ITEM_DELETE:"START_ITEM_DELETE"
+    START_ITEM_DELETE:"START_ITEM_DELETE",
+    CREATE_LIST: "CREATE_LIST"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
 const tps = new jsTPS();
+
+let counter = 0;
 
 // WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
 // AVAILABLE TO THE REST OF THE APPLICATION
@@ -139,6 +142,19 @@ export const useGlobalStore = () => {
                     isListNameEditActive: false,
                     isItemEditActive: false,
                     listMarkedForDeletion: payload,
+                    isEditActive: false
+                });
+            }
+
+            case GlobalStoreActionType.CREATE_LIST: {
+                console.log("created");
+                return setStore({
+                    idNamePairs: payload,
+                    currentList: null,
+                    newListCounter: 23,
+                    isListNameEditActive: false,
+                    isItemEditActive: false,
+                    listMarkedForDeletion: null,
                     isEditActive: false
                 });
             }
@@ -294,6 +310,7 @@ export const useGlobalStore = () => {
         });
     }
 
+    //allows item names to be edited
     store.setIsItemNameEditActive = function () {
         storeReducer({
             type: GlobalStoreActionType.SET_ITEM_NAME_EDIT_ACTIVE,
@@ -301,6 +318,7 @@ export const useGlobalStore = () => {
         });
     }
 
+    //brings up delete list modal
     store.startDeleteList = function (id) {
         async function asyncStartDeleteList(){ 
             let response = await apis.getTop5ListById(id);
@@ -319,24 +337,67 @@ export const useGlobalStore = () => {
         modal.classList.add("is-visible");
     }
 
+    //hide the delete list modal
     store.hideDeleteListModal = function(){
         let modal = document.getElementById("delete-modal");
         modal.classList.remove("is-visible");
     }
 
+    //deletes the list that is currently marked for deleltion
     store.deleteMarkedList = function () {
         async function asyncStartDeleteList(){ 
             let response = await apis.deleteTop5ListById(store.listMarkedForDeletion._id);
             if(response.data.success){
-                storeReducer({
-                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
-                    payload: store.idNamePairs,
-                    listMarkedForDeletion: null
-                });
+                async function getListPairs(){
+                    let response = await apis.getTop5ListPairs();
+                    if(response.data.success){
+                        store.loadIdNamePairs();
+                        let pairs = response.data.idNamePairs;
+                        storeReducer({
+                            type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
+                            payload: pairs,
+                            listMarkedForDeletion: null
+                        });
+                    }
+                }
+                getListPairs();
             }
         }
         store.hideDeleteListModal();
-        asyncStartDeleteList();
+        asyncStartDeleteList().then(store.loadIdNamePairs());
+        store.loadIdNamePairs();
+    }
+
+    store.createList = function () {
+        console.log(counter);
+        let newList = {
+            "name" : "Untitled " + (counter + 1),
+            "items": ["?", "?", "?", "?", "?"]
+        };
+        async function asyncCreateList(){
+            let response = await apis.createTop5List(newList);
+            counter = counter + 1;
+            if(response.data.success){
+                async function asyncCreateList2(){
+                    let response = await apis.getTop5ListPairs();
+                    if(response.data.success){
+                        let pairs = response.data.idNamePairs;
+                        storeReducer({
+                            type: GlobalStoreActionType.CREATE_LIST,
+                            newListCounter: 11,
+                            payload: pairs,
+                            listMarkedForDeletion: null
+                        });
+                        let _id = pairs.at(-1)._id;
+                        if (_id.indexOf('list-card-text-') >= 0)
+                        _id = ("" + _id).substring("list-card-text-".length);
+                        store.setCurrentList(_id);
+                    }
+                }
+                asyncCreateList2();
+            }
+        }
+        asyncCreateList();
     }
 
     // THIS GIVES OUR STORE AND ITS REDUCER TO ANY COMPONENT THAT NEEDS IT

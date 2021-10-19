@@ -13,7 +13,9 @@ const ListSelector = () => {
     const { store } = useContext(GlobalStoreContext);
     store.history = useHistory();
 
-    async function addList() {
+    function addList() {
+        store.createList();
+        /*
        let response = await apis.createTop5List({
             "name" : "Untitled",
             "items": ["?", "?", "?", "?", "?"]
@@ -21,6 +23,7 @@ const ListSelector = () => {
         if (response.data.success) {
             loadList();
         }
+        */
     }
 
     function loadList(){
@@ -46,15 +49,23 @@ const ListSelector = () => {
             />
         ))
     }
+
+    let addListStatus = false;
+    let addListClass = "top5-button";
+    if(store.isListNameEditActive){
+        addListStatus = true;
+        addListClass = "top5-button-disabled"
+    } 
     return (
         <div id="top5-list-selector">
             <div id="list-selector-heading">
                 <input
+                    disabled={addListStatus}
                     type="button"
                     id="add-list-button"
-                    className="top5-button"
+                    className={addListClass}
                     value="+"
-                    onClick= {addList} />
+                    onClick= {addListStatus ? undefined : addList} />
                 Your Lists
             </div>
             <div id="list-selector-list">
